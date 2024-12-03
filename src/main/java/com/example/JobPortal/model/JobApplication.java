@@ -6,6 +6,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,4 +39,13 @@ public class JobApplication {
         this.skills = skills;
         this.jobId = jobId;
     }
+    @JsonProperty("id")
+    public String getIdString() {
+        return id != null ? id.toHexString() : null;
+    }
+    @JsonProperty("jobId")
+    public String getJobIdString() {
+        return jobId != null ? jobId.toHexString() : null;
+    }
+    
 }
