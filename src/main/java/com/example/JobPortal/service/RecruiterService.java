@@ -5,6 +5,7 @@ import java.util.Optional;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.JobPortal.model.Recruiter;
@@ -14,6 +15,10 @@ import com.example.JobPortal.repository.RecruiterRepository;
 public class RecruiterService {
     @Autowired
     private RecruiterRepository recruiterRepository;
+
+     @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<Recruiter> allRecruiters() {
         return recruiterRepository.findAll();
     }
