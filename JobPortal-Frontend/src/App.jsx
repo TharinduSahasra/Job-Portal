@@ -1,12 +1,21 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Home from './pages/Home'
-
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import Footer from "./components/footer/Index";
+import Header from "./components/Header/Index";
 function App() {
-  return <Home />;
   
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return (
+    <div className="min-h-screen flex flex-col justify-between bg-slate-950">
+        <Header />
+      <Outlet />
+
+      <Footer />
+    </div>
+  );
 }
 
 export default App
