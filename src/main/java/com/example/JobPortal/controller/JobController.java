@@ -1,6 +1,6 @@
 package com.example.JobPortal.controller;
 
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.JobPortal.model.Job;
-import com.example.JobPortal.model.JobApplication;
+
 import com.example.JobPortal.service.JobService;
 
 @RestController
@@ -26,7 +26,7 @@ import com.example.JobPortal.service.JobService;
 @CrossOrigin(origins = "*")
 public class JobController {
 
-    final List<String> VALID_STATUS_OPTIONS = Arrays.asList("Pending", "Accepted", "Rejected");
+   
 
     @Autowired
     private JobService jobService;
@@ -52,14 +52,5 @@ public class JobController {
         return new ResponseEntity<Job>(jobService.deleteJob(jobId), HttpStatus.NO_CONTENT);
     }
 
-        @PostMapping("/{applicationId}")
-    public ResponseEntity<?> updateJobApplicationStatus(@PathVariable String applicationId, @RequestBody String newStatus) {
-        ObjectId applicationObjectId = new ObjectId(applicationId);
-
-        if (VALID_STATUS_OPTIONS.contains(newStatus)) {
-            return new ResponseEntity<JobApplication>(jobApplicationService.updateStatus(applicationObjectId, newStatus), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<String>("Invalid option", HttpStatus.BAD_REQUEST);
-        }
-    }
+        
 }

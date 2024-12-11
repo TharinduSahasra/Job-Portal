@@ -27,7 +27,6 @@ public class JobApplicationService {
     
     public JobApplication updateStatus(ObjectId applicationId, String newStatus) {
         JobApplication application = jobApplicationRepository.findById(applicationId).orElseThrow(() -> new RuntimeException("Job application not found"));
-
         application.setStatus(newStatus);
         jobApplicationRepository.save(application);
         return application;

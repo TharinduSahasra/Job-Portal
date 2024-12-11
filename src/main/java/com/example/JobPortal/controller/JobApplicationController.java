@@ -1,5 +1,6 @@
 package com.example.JobPortal.controller;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ import com.example.JobPortal.service.JobApplicationService;
 public class JobApplicationController {
     @Autowired
     private JobApplicationService jobApplicationService;
+    final List<String> VALID_STATUS_OPTIONS = Arrays.asList("Pending", "Accepted", "Rejected");
     @GetMapping
     public ResponseEntity<List<JobApplication>> getAllJobApplications() {
         return new ResponseEntity<List<JobApplication>>(jobApplicationService.allJobApplications(), HttpStatus.OK);
@@ -36,5 +38,15 @@ public class JobApplicationController {
     @PostMapping
     public ResponseEntity<JobApplication> applyForJob(@RequestBody JobApplication jobApplication) {
         return new ResponseEntity<JobApplication>(jobApplicationService.createJobApplication(jobApplication), HttpStatus.CREATED);
+    }
+    @PostMapping("/{applicationId}")
+    public ResponseEntity<?> updateJobApplicationStatus(@PathVariable String applicationId, @RequestBody String newStatus) {
+        ObjectId applicationObjectId = new ObjectId(applicationId);
+
+        if (VALID_STATUS_OPTIONS.contains(newStatus)) {
+            return new ResponseEntity<JobApplication>(jobApplicationService.updateStatus(applicationObjectId, newStatus), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<String>("Invalid option", HttpStatus.BAD_REQUEST);
+        }
     }
 }
