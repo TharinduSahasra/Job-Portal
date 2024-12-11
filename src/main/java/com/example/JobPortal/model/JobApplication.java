@@ -8,9 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 
 @Document(collection = "jobApplications")
 @Data
@@ -39,6 +37,12 @@ public class JobApplication {
         this.skills = skills;
         this.jobId = jobId;
     }
+
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @JsonProperty("id")
     public String getIdString() {
         return id != null ? id.toHexString() : null;
