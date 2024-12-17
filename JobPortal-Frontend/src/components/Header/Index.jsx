@@ -1,9 +1,11 @@
 import Logo from "../Logo";
-import {Link} from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 
 
 const Header = () => {
+
+  const navigate = useNavigate();
+
     const isLoggedIn = true;
     return (
       <header className="w-full py-4 2xl:py-6 px-10 font-fira bg-white bg-opacity-10 backdrop-blur-lg fixed z-10">
@@ -16,7 +18,7 @@ const Header = () => {
           <ul className="flex gap-x-4 text-white/80 font-semibold text-lg 2xl:text-2xl">
             <li>
               <button
-                onClick={() => {}}
+                onClick={() => navigate("/")}
                 className="inline-block px-4 py-2 duration-200 hover:bg-slate-900 hover:text-orange-400 rounded-2xl"
               >
                 Home
@@ -24,7 +26,7 @@ const Header = () => {
             </li>
             <li>
               <button
-                onClick={() => {}}
+                onClick={() => navigate("/jobs")}
                 className="inline-block px-4 py-2 duration-200 hover:bg-slate-900 hover:text-orange-400 rounded-2xl"
               >
                 Job Listings
