@@ -26,6 +26,8 @@ public class RecruiterService {
         return recruiterRepository.findByEmail(email);
     }
     public Recruiter createRecruiter(Recruiter recruiter) {
+        String hashedPassword = passwordEncoder.encode(recruiter.getPassword());
+        recruiter.setPassword(hashedPassword);
         return recruiterRepository.insert(recruiter);
     }
 }

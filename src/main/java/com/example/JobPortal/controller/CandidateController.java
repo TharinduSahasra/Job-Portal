@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.JobPortal.model.Candidate;
+import com.example.JobPortal.security.JwtTokenProvider;
 import com.example.JobPortal.service.CandidateService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,78 +35,72 @@ import jakarta.servlet.http.HttpSession;
 @CrossOrigin
 public class CandidateController {
 
-     @Autowired
+    @Autowired
     private CandidateService candidateService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private JwtTokenProvider jwtTokenProvider;
 
     @GetMapping
     public ResponseEntity<List<Candidate>> getAllCandidates() {
-        return new ResponseEntity<List<Candidate>>(candidateService.allCandidates(), HttpStatus.OK);
-    }
-
-    //    TO BE REMOVED LATER, USING JUST FOR TESTING PURPOSES
-    @GetMapping("/{email}")
-    public ResponseEntity<Optional<Candidate>> getSingleCandidate(@PathVariable String email) {
-        return new ResponseEntity<Optional<Candidate>>(candidateService.singleCandidate(email), HttpStatus.OK);
+        return new ResponseEntity<>(candidateService.allCandidates(), HttpStatus.OK);
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Candidate candidate) {
         Optional<Candidate> existingCandidate = candidateService.singleCandidate(candidate.getEmail());
         if (existingCandidate.isPresent()) {
-            return new ResponseEntity<String>("Email already taken", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Email already taken", HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<Candidate>(candidateService.createCandidate(candidate), HttpStatus.CREATED);
+        // Hash the password before saving
+        candidate.setPassword(passwordEncoder.encode(candidate.getPassword()));
+        Candidate savedCandidate = candidateService.createCandidate(candidate);
+
+        // Remove password from response
+        savedCandidate.setPassword(null);
+
+        return new ResponseEntity<>(savedCandidate, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> payload, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String password = payload.get("password");
 
         try {
             Optional<Candidate> candidate = candidateService.singleCandidate(email);
             if (candidate.isEmpty()) {
-                return new ResponseEntity<Map<String, Object>>(Map.of("error", "Email not found"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(Map.of("error", "Email not found"), HttpStatus.NOT_FOUND);
             }
 
             String hashedPassword = candidate.get().getPassword();
-
             if (!passwordEncoder.matches(password, hashedPassword)) {
-                return new ResponseEntity<Map<String, Object>>(Map.of("error", "Wrong password"), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(Map.of("error", "Wrong password"), HttpStatus.UNAUTHORIZED);
             }
 
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
+            // Generate JWT token
+            String token = jwtTokenProvider.generateToken(email);
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-            HttpSession session = httpServletRequest.getSession(true);
+            // Remove password from response
+            candidate.get().setPassword(null);
 
             Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("token", session.getId());
-            responseBody.put("candidate", candidate);
+            responseBody.put("token", token);
+            responseBody.put("candidate", candidate.get());
 
-            return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
-        } catch (AuthenticationException e) {
-            return new ResponseEntity<Map<String, Object>>(Map.of("error", "Authentication error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(Map.of("error", "Authentication error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-
-        SecurityContextHolder.clearContext();
-
-        return new ResponseEntity<String>("Logged out successfully", HttpStatus.OK);
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        // For JWT, logout can be handled by token invalidation on the client side
+        return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
     }
-
 }
