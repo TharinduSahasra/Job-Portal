@@ -4,6 +4,8 @@ import './index.css'
 import App from './App.jsx'
 import Home from './pages/Home.jsx'
 import JobListings from './pages/JobListings.jsx'
+import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
@@ -20,11 +22,24 @@ const router = createBrowserRouter([
         path: "/jobs",
         element: <JobListings />,
       },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
     ],
   },
 ]);
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-   <RouterProvider router={router} />
+   <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <RouterProvider router={router} />
+      </PersistGate>
+    </Provider>
   </StrictMode>,
 )

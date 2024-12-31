@@ -1,4 +1,6 @@
 import { useParams } from "react-router-dom";
+import LoginForm from "../components/Auth/LoginForm.Jsx";
+
 
 const Login = () => {
   const { type } = useParams();
