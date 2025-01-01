@@ -8,6 +8,9 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./store/Store";
 
 const router = createBrowserRouter([
   {
