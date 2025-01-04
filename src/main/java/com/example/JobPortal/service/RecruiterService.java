@@ -30,4 +30,5 @@ public class RecruiterService {
         recruiter.setPassword(hashedPassword);
         return recruiterRepository.insert(recruiter);
     }
+    
 }
