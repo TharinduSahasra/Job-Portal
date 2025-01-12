@@ -1,13 +1,15 @@
+import { useSelector } from "react-redux";
+
 import HeroSection from "../components/HeroSection";
 import ButtonsSection from "../components/ButtonsSection";
-import Footer from "../components/footer/Index";
-import ProfileSection from "../components/ProfileSelction";
-import ApplicationsSection from "../components/ApplicationsSelection";
+import ProfileSection from "../components/ProfileSection";
+import ApplicationsSection from "../components/ApplicationsSection"
 
 const Home = () => {
-  const isLoggedIn = true;
-  const isRecruiter = true;
-  if (!isLoggedIn) {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const isRecruiter = useSelector((state) => state.auth.isRecruiter);
+
+  if (!isAuthenticated) {
     return (
       <div className="pt-40 px-32">
         <HeroSection />
@@ -15,6 +17,7 @@ const Home = () => {
       </div>
     );
   }
+
   if (isRecruiter) {
     return (
       <div className="pt-40 px-32">
@@ -24,12 +27,13 @@ const Home = () => {
     );
   }
 
+  // FOR CANDIDATES
   return (
     <div className="pt-40 px-32">
-    
-    <ProfileSection />
-    <ApplicationsSection />
-  </div>
-);
+      <ProfileSection />
+      <ApplicationsSection />
+    </div>
+  );
 };
-  export default Home;
+
+export default Home;

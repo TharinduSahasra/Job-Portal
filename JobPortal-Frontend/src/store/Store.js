@@ -9,9 +9,12 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
+
 import authReducer from "./authSlice";
 import persistConfig from "./persistConfig";
+
 const persistedReducer = persistReducer(persistConfig, authReducer);
+
 const store = configureStore({
   reducer: {
     auth: persistedReducer,
@@ -23,5 +26,7 @@ const store = configureStore({
       },
     }),
 });
+
 const persistor = persistStore(store);
+
 export { store, persistor };
