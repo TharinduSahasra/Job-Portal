@@ -15,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.JobPortal.model.Candidate;
+import com.example.JobPortal.model.Recruiter;
 import com.example.JobPortal.security.JwtTokenProvider;
 import com.example.JobPortal.service.CandidateService;
 
@@ -107,5 +109,16 @@ public class CandidateController {
         SecurityContextHolder.clearContext();
 
         return new ResponseEntity<String>("Logged out successfully", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{email}")
+    public ResponseEntity<String> deleteCandidate(@PathVariable String email) {
+        Optional<Candidate> candidate = candidateService.singleCandidate(email);
+        if (candidate.isEmpty()) {
+            return new ResponseEntity<>("Candidate not found", HttpStatus.NOT_FOUND);
+        }
+
+        candidateService.deleteCandidate(email);
+        return new ResponseEntity<>("Candidate deleted successfully", HttpStatus.OK);
     }
 }

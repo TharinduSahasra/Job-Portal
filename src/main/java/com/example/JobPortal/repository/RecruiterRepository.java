@@ -10,4 +10,5 @@ import com.example.JobPortal.model.Recruiter;
 public interface RecruiterRepository extends MongoRepository<Recruiter,ObjectId>{
     
     Optional<Recruiter> findByEmail(String email);
+
 }

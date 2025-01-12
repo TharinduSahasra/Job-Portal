@@ -31,6 +31,11 @@ public class CandidateService {
         candidate.setPassword(hashedPassword);
         return candidateRepository.insert(candidate);
     }
+public void deleteCandidate(String email) {
+        Candidate candidate = candidateRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Candidate not found"));
+        candidateRepository.delete(candidate);
+    }
+   
 
 
 

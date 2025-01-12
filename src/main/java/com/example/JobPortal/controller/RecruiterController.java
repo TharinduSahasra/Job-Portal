@@ -14,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -108,5 +109,16 @@ public class RecruiterController {
         SecurityContextHolder.clearContext();
 
         return new ResponseEntity<String>("Logged out successfully", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{email}")
+    public ResponseEntity<String> deleteRecruiter(@PathVariable String email) {
+        Optional<Recruiter> recruiter = recruiterService.singleRecruiter(email);
+        if (recruiter.isEmpty()) {
+            return new ResponseEntity<>("Recruiter not found", HttpStatus.NOT_FOUND);
+        }
+
+        recruiterService.deleteRecruiter(email);
+        return new ResponseEntity<>("Recruiter deleted successfully", HttpStatus.OK);
     }
 }

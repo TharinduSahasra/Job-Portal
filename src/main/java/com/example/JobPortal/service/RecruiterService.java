@@ -30,4 +30,7 @@ public class RecruiterService {
         recruiter.setPassword(hashedPassword);
         return recruiterRepository.insert(recruiter);
     }
-}
+     public void deleteRecruiter(String email) {
+        Recruiter recruiter = recruiterRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Recruiter not found"));
+        recruiterRepository.delete(recruiter);
+}}
