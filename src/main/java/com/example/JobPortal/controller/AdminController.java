@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.JobPortal.model.Admin;
+import com.example.JobPortal.model.Candidate;
+import com.example.JobPortal.model.Recruiter;
 import com.example.JobPortal.service.AdminService;
+import com.example.JobPortal.service.RecruiterService;
+import com.example.JobPortal.service.CandidateService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +41,13 @@ public class AdminController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RecruiterService recruiterService;
+
+    @Autowired
+    private CandidateService candidateService;
+
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -100,4 +112,42 @@ public class AdminController {
 
         return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
     }
+
+   // Admin: Get all recruiters
+   @GetMapping("/recruiters")
+   public ResponseEntity<List<Recruiter>> getAllRecruiters() {
+       List<Recruiter> recruiters = recruiterService.allRecruiters();
+       return new ResponseEntity<>(recruiters, HttpStatus.OK);
+   }
+
+   // Admin: Get all candidates
+   @GetMapping("/candidates")
+   public ResponseEntity<List<Candidate>> getAllCandidates() {
+       List<Candidate> candidates = candidateService.allCandidates();
+       return new ResponseEntity<>(candidates, HttpStatus.OK);
+   }
+
+   // Admin: Delete recruiter by email
+   @DeleteMapping("/recruiter/delete/{email}")
+   public ResponseEntity<String> deleteRecruiter(@PathVariable String email) {
+       Optional<Recruiter> recruiter = recruiterService.singleRecruiter(email);
+       if (recruiter.isEmpty()) {
+           return new ResponseEntity<>("Recruiter not found", HttpStatus.NOT_FOUND);
+       }
+
+       recruiterService.deleteRecruiter(email);
+       return new ResponseEntity<>("Recruiter deleted successfully", HttpStatus.OK);
+   }
+
+   // Admin: Delete candidate by email
+   @DeleteMapping("/candidate/delete/{email}")
+   public ResponseEntity<String> deleteCandidate(@PathVariable String email) {
+       Optional<Candidate> candidate = candidateService.singleCandidate(email);
+       if (candidate.isEmpty()) {
+           return new ResponseEntity<>("Candidate not found", HttpStatus.NOT_FOUND);
+       }
+
+       candidateService.deleteCandidate(email);
+       return new ResponseEntity<>("Candidate deleted successfully", HttpStatus.OK);
+   }
 }
