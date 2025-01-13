@@ -9,8 +9,8 @@ import { skillOptions } from "../data/constants";
 
 const PostJobForm = () => {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
+
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const userData = useSelector((state) => state.auth.userData);
   const isRecruiter = useSelector((state) => state.auth.isRecruiter);
@@ -24,6 +24,8 @@ const PostJobForm = () => {
   const [experience, setExperience] = useState("");
   const [description, setDescription] = useState("");
   const [skills, setSkills] = useState([]);
+  const [minSalary, setMinSalary] = useState("");
+  const [maxSalary, setMaxSalary] = useState("");
 
   useEffect(() => {
     setCompany(userData?.company);
@@ -50,7 +52,13 @@ const PostJobForm = () => {
       experience,
       description,
       skills: skillsArray,
+      salaryRange: `${minSalary} - ${maxSalary} USD`,
     };
+
+    if (parseInt(minSalary) > parseInt(maxSalary)) {
+      setError("Minimum salary cannot be greater than maximum salary.");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -69,16 +77,12 @@ const PostJobForm = () => {
           setIsLoading(false);
           navigate("/jobs");
         }
-
-        setIsLoading(false);
       }
     } catch (error) {
-      console.log(error);
-      setError("Something went wrong!");
+      console.error(error);
+      setError("Something went wrong. Please try again.");
       setIsLoading(false);
     }
-
-    console.log(skillsArray);
   };
 
   return (
@@ -90,6 +94,7 @@ const PostJobForm = () => {
         Post New Job
       </h1>
 
+      {/* Position */}
       <div>
         <input
           type="text"
@@ -97,30 +102,33 @@ const PostJobForm = () => {
           value={position}
           onChange={(e) => setPosition(e.target.value)}
           className="w-full py-2 px-4 text-lg rounded-lg text-black/80 font-semibold"
-          required={true}
+          required
         />
       </div>
 
+      {/* Company */}
       <div>
         <input
           type="text"
           value={company}
-          readOnly={true}
+          readOnly
           className="w-full py-1 px-4 rounded-lg text-black font-semibold bg-white/75"
-          required={true}
+          required
         />
       </div>
 
+      {/* Location */}
       <div>
         <input
           type="text"
           value={location}
-          readOnly={true}
+          readOnly
           className="w-full py-1 px-4 rounded-lg text-black font-semibold bg-white/75"
-          required={true}
+          required
         />
       </div>
 
+      {/* Experience */}
       <div className="mt-6">
         <input
           type="text"
@@ -128,10 +136,31 @@ const PostJobForm = () => {
           value={experience}
           onChange={(e) => setExperience(e.target.value)}
           className="w-full py-2 px-4 text-lg rounded-lg text-black/80 font-semibold"
-          required={true}
+          required
         />
       </div>
 
+      {/* Salary Range */}
+      <div className="flex gap-4">
+        <input
+          type="number"
+          placeholder="Min Salary (LKR)"
+          value={minSalary}
+          onChange={(e) => setMinSalary(e.target.value)}
+          className="w-full py-2 px-4 text-lg rounded-lg text-black/80 font-semibold"
+          required
+        />
+        <input
+          type="number"
+          placeholder="Max Salary (LKR)"
+          value={maxSalary}
+          onChange={(e) => setMaxSalary(e.target.value)}
+          className="w-full py-2 px-4 text-lg rounded-lg text-black/80 font-semibold"
+          required
+        />
+      </div>
+
+      {/* Description */}
       <div>
         <textarea
           cols="30"
@@ -140,9 +169,11 @@ const PostJobForm = () => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full py-2 px-4 rounded-lg text-black/80 font-medium"
+          required
         ></textarea>
       </div>
 
+      {/* Skills */}
       <div>
         <h3 className="text-lg text-white mb-2 font-medium">Skills Required</h3>
         <Creatable
@@ -153,6 +184,7 @@ const PostJobForm = () => {
         />
       </div>
 
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={isLoading}
@@ -160,11 +192,11 @@ const PostJobForm = () => {
           isLoading && "opacity-30 hover:opacity-40"
         }`}
       >
-        Post Job
+        {isLoading ? "Posting..." : "Post Job"}
       </button>
 
-      {/* ERROR NOTIFICATION */}
-      <p className="text-red-500 text-center text-lg font-black">{error}</p>
+      {/* Error Notification */}
+      {error && <p className="text-red-500 text-center text-lg font-black">{error}</p>}
     </form>
   );
 };
