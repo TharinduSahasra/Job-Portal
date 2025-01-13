@@ -25,9 +25,6 @@ import com.example.JobPortal.service.JobService;
 @RequestMapping("/api/v1/jobs")
 @CrossOrigin(origins = "*")
 public class JobController {
-
-   
-
     @Autowired
     private JobService jobService;
 
@@ -51,6 +48,4 @@ public class JobController {
         ObjectId jobId = new ObjectId(id);
         return new ResponseEntity<Job>(jobService.deleteJob(jobId), HttpStatus.NO_CONTENT);
     }
-
-        
 }

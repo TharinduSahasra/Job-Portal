@@ -1,6 +1,8 @@
-import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
+import storage from "redux-persist/lib/storage";
+
 const persistConfig = {
   key: "root",
   storage,
 };
+
 export default persistConfig;

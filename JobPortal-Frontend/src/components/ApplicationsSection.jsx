@@ -148,7 +148,6 @@ const ApplicationsSection = () => {
         <div>
           <p className="opacity-80">{item.email}</p>
           <p className="opacity-80">{item.phone}</p>
-
           <p className="my-4">
             {item.skills.map((skill, idx) => (
               <span
