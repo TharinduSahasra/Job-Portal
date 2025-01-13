@@ -34,7 +34,7 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/v1/candidates")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class CandidateController {
 
     @Autowired

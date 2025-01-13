@@ -60,7 +60,7 @@ const PostJobForm = () => {
       if (jobResponse.status === 201) {
         const appendResponse = await api.post(
           `/api/v1/recruiters/${userData?.email}/appendjob`,
-          jobResponse.data.id
+          { jobId: jobResponse.data.id }
         );
 
         if (appendResponse.status === 200) {

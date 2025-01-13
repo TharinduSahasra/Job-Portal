@@ -65,7 +65,6 @@ public class Recruiter {
     public void addJobId(ObjectId jobId) {
         this.jobIds.add(jobId);
     }
-
     public void removeJobId(ObjectId jobId) {
         this.jobIds.remove(jobId);
     }

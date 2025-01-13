@@ -42,6 +42,7 @@ public class RecruiterController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    
     @GetMapping
     public ResponseEntity<List<Recruiter>> getAllRecruiters() {
         return new ResponseEntity<List<Recruiter>>(recruiterService.allRecruiters(), HttpStatus.OK);
@@ -52,10 +53,20 @@ public class RecruiterController {
     public ResponseEntity<Optional<Recruiter>> getSingleRecruiter(@PathVariable String email) {
         return new ResponseEntity<Optional<Recruiter>>(recruiterService.singleRecruiter(email), HttpStatus.OK);
     }
-
+    @PostMapping("/{email}/appendjob")
+    public ResponseEntity<?> appendJob(@PathVariable String email, @RequestBody Map<String, String> request) {
+        try {
+            String jobId = request.get("jobId");
+            return new ResponseEntity<>(recruiterService.addJobToRecruiter(email, jobId), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     
-
-   
+    @PostMapping("/{email}/removejob")
+    public ResponseEntity<Recruiter> removeJob(@PathVariable String email, @RequestBody String jobId) {
+        return new ResponseEntity<Recruiter>(recruiterService.removeJobFromRecruiter(email, jobId), HttpStatus.OK);
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Recruiter recruiter) {
@@ -110,15 +121,14 @@ public class RecruiterController {
 
         return new ResponseEntity<String>("Logged out successfully", HttpStatus.OK);
     }
-
     @DeleteMapping("/{email}")
     public ResponseEntity<String> deleteRecruiter(@PathVariable String email) {
         Optional<Recruiter> recruiter = recruiterService.singleRecruiter(email);
         if (recruiter.isEmpty()) {
-            return new ResponseEntity<>("Recruiter not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<String>("Recruiter not found", HttpStatus.NOT_FOUND);
         }
 
         recruiterService.deleteRecruiter(email);
-        return new ResponseEntity<>("Recruiter deleted successfully", HttpStatus.OK);
+        return new ResponseEntity<String>("Recruiter deleted successfully", HttpStatus.NO_CONTENT);
     }
 }
