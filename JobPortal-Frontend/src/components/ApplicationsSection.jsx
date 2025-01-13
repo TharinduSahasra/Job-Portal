@@ -89,9 +89,9 @@ const ApplicationsSection = () => {
     try {
       const response = await api.post(
         `/api/v1/applications/${item.id}`,
-        "Accepted"
+        "Accepted",
+        { headers: { "Content-Type": "text/plain" } }
       );
-
       if (response.status === 200) {
         setPendingApplications(
           pendingApplications.filter(
@@ -114,7 +114,8 @@ const ApplicationsSection = () => {
     try {
       const response = await api.post(
         `/api/v1/applications/${item.id}`,
-        "Rejected"
+        "Rejected",
+        { headers: { "Content-Type": "text/plain" } }
       );
 
       if (response.status === 200) {
