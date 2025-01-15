@@ -11,9 +11,9 @@ const Home = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="pt-40 px-32">
+      <div className="pt-40 px-6 md:px-16">
         <HeroSection />
-        <ButtonsSection />
+        
       </div>
     );
   }

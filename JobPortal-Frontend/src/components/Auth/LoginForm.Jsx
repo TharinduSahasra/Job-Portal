@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
 import { login as storeLogin } from "../../store/authSlice";
 import api from "../../api/axiosConfig";
 import EyeIcon from "../Icons/EyeIcon";
@@ -9,7 +8,6 @@ import EyeCloseIcon from "../Icons/EyeCloseIcon";
 
 const LoginForm = ({ userType }) => {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
@@ -62,7 +60,6 @@ const LoginForm = ({ userType }) => {
       } else {
         setError("Something went wrong!");
       }
-
       setIsLoading(false);
     }
   };
@@ -70,33 +67,31 @@ const LoginForm = ({ userType }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className={`p-14 mb-24 w-full max-w-md 2xl:max-w-xl rounded-lg flex flex-col gap-4 2xl:gap-10 mx-auto ${
-        userType === "recruiter" ? "bg-slate-700" : "bg-slate-800"
-      }`}
+      className={`p-10 max-w-lg mx-auto mt-24 bg-gray-800 rounded-lg shadow-md flex flex-col gap-6`}
     >
-      <h1 className="text-3xl 2xl:text-5xl font-bold text-white text-center mb-8 2xl:mb-12">
+      <h1 className="text-4xl font-bold text-white text-center mb-8">
         {userType === "recruiter" ? "Recruiter Login" : "Candidate Login"}
       </h1>
 
-      <div>
+      <div className="space-y-4">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full py-2 px-4 text-lg rounded-lg text-black/80"
-          required={true}
+          className="w-full p-4 text-lg rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
         />
       </div>
 
-      <div className="flex justify-between gap-1 items-center">
+      <div className="flex justify-between items-center gap-2">
         <input
           type={showPassword ? "text" : "password"}
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full py-2 px-4 text-lg rounded-lg text-black/80"
-          required={true}
+          className="w-full p-4 text-lg rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
         />
 
         <EyeIcon
@@ -116,24 +111,22 @@ const LoginForm = ({ userType }) => {
       <button
         type="submit"
         disabled={isLoading}
-        className={`py-2 px-4 my-10 bg-green-500 hover:opacity-70 rounded-lg text-white text-lg font-semibold transition-opacity ${
-          isLoading && "opacity-30 hover:opacity-40"
-        }`}
+        className={`py-3 px-6 mt-8 bg-indigo-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 ${isLoading && "opacity-50"}`}
       >
-        Login
+        {isLoading ? "Logging In..." : "Login"}
       </button>
 
-      {/* ERROR NOTIFICATION */}
-      <p className="text-red-500 text-center text-lg font-black">{error}</p>
+      {/* Error Notification */}
+      {error && (
+        <p className="text-red-500 text-center mt-4 font-semibold">{error}</p>
+      )}
 
-      <p className="text-secondary text-center">
+      <p className="text-center mt-6 text-white">
         <Link
-          to={`/register/${
-            userType === "recruiter" ? "recruiter" : "candidate"
-          }`}
-          className="text-white/80 hover:text-purple-500 text-lg font-semibold"
+          to={`/register/${userType === "recruiter" ? "recruiter" : "candidate"}`}
+          className="text-gray-300 hover:text-indigo-400 text-lg font-medium"
         >
-          Are you new here? Create a New Account
+          New here? Create a New Account
         </Link>
       </p>
     </form>

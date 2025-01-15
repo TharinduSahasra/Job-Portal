@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import com.example.JobPortal.model.Recruiter;
 import com.example.JobPortal.repository.RecruiterRepository;
 
+
+
 @Service
 public class RecruiterService {
     @Autowired
@@ -48,6 +50,7 @@ public class RecruiterService {
         recruiter.removeJobId(objectId);
         return recruiterRepository.save(recruiter);
     }
+
     public void deleteRecruiter(String email) {
         Recruiter recruiter = recruiterRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Recruiter not found"));
         recruiterRepository.delete(recruiter);
