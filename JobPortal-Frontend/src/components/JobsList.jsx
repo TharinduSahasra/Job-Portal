@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { FiTrash2, FiSend } from "react-icons/fi";
 
 const JobsList = ({
   actionLoading,
@@ -9,8 +10,10 @@ const JobsList = ({
   onDelete,
   setSelectedJob,
 }) => {
-  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredJobs, setFilteredJobs] = useState(jobs);
 
+  const navigate = useNavigate();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const isRecruiter = useSelector((state) => state.auth.isRecruiter);
   const userData = useSelector((state) => state.auth.userData);
@@ -20,6 +23,18 @@ const JobsList = ({
       navigate("/");
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    const lowercasedQuery = searchQuery.toLowerCase();
+    setFilteredJobs(
+      jobs.filter(
+        (job) =>
+          job.position.toLowerCase().includes(lowercasedQuery) ||
+          job.company.toLowerCase().includes(lowercasedQuery) ||
+          job.location.toLowerCase().includes(lowercasedQuery)
+      )
+    );
+  }, [searchQuery, jobs]);
 
   const handleApplyClick = (job) => {
     setSelectedJob(job);
@@ -32,46 +47,53 @@ const JobsList = ({
 
   return (
     <div className="text-white">
-      <h1 className="text-2xl font-bold">Available Jobs</h1>
+      <h1 className="text-3xl font-extrabold mb-6">Available Jobs</h1>
 
-      {isRecruiter && (
-        <div className="my-6">
+      {/* Search Bar Section */}
+      <div className="mb-8 flex items-center gap-4">
+        <input
+          type="text"
+          placeholder="Search by position, company, or location..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full py-3 px-4 rounded-lg bg-slate-700 text-white placeholder-gray-400 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        {isRecruiter && (
           <button
             onClick={() => navigate("/postjob")}
-            className="py-3 px-8 bg-green-600 hover:opacity-70 rounded-lg text-white text-lg font-bold transition-opacity"
+            className="py-3 px-8 bg-green-600 hover:bg-green-500 rounded-lg text-white text-lg font-bold transition-all shadow-lg"
           >
             + Post New Job
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="my-6 flex flex-col gap-6">
-        {jobs.length > 0 ? (
-          jobs.map((job) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredJobs.length > 0 ? (
+          filteredJobs.map((job) => (
             <div
               key={job.id}
-              className="my-4 p-4 flex justify-between items-center gap-4 border border-white/20 rounded-lg"
+              className="p-6 bg-slate-800 border border-white/10 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-transform"
             >
               {/* Job Details Section */}
-              <div>
-                <h2 className="text-xl font-semibold">{job.position}</h2>
+              <div className="mb-4">
+                <h2 className="text-2xl font-semibold mb-2">{job.position}</h2>
                 <p className="opacity-80 mb-1">
                   Salary Range: <span className="font-medium">{job.salaryRange}</span>
                 </p>
-                <p className="opacity-80 mb-4">
-                  {job.experience} of Experience required
-                </p>
+                <p className="opacity-80 mb-4">{job.experience} of Experience required</p>
 
-                <h2 className="font-semibold">{job.company}</h2>
+                <h3 className="font-semibold">{job.company}</h3>
                 <p className="opacity-80">{job.location}</p>
               </div>
 
               {/* Skills Section */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-6">
                 {job.skills.map((item, idx) => (
                   <span
                     key={idx}
-                    className="mr-2 py-1 px-2 bg-slate-700 text-xs border rounded-md"
+                    className="py-1 px-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-xs rounded-full text-white shadow-md cursor-pointer"
+                    title={`Skill: ${item}`}
                   >
                     {item}
                   </span>
@@ -79,25 +101,27 @@ const JobsList = ({
               </div>
 
               {/* Action Buttons Section */}
-              <div>
+              <div className="flex justify-end">
                 {isRecruiter && userData.jobIds.includes(job.id) ? (
                   <button
                     onClick={() => handleDeleteClick(job)}
                     disabled={actionLoading}
-                    className={`py-4 px-8 bg-red-600 hover:opacity-70 rounded-lg text-white text-lg font-semibold transition-opacity ${
-                      actionLoading && "opacity-30 hover:opacity-40"
+                    className={`flex items-center gap-2 py-3 px-6 bg-red-600 hover:bg-red-500 rounded-lg text-white text-lg font-semibold transition-all ${
+                      actionLoading && "opacity-50 cursor-not-allowed"
                     }`}
                   >
+                    <FiTrash2 />
                     Delete
                   </button>
                 ) : (
                   <button
                     onClick={() => handleApplyClick(job)}
                     disabled={isRecruiter}
-                    className={`py-4 px-8 bg-green-600 hover:opacity-70 rounded-lg text-white text-lg font-semibold transition-opacity ${
-                      isRecruiter && "opacity-30 hover:opacity-40"
+                    className={`flex items-center gap-2 py-3 px-6 bg-green-600 hover:bg-green-500 rounded-lg text-white text-lg font-semibold transition-all ${
+                      isRecruiter && "opacity-50 cursor-not-allowed"
                     }`}
                   >
+                    <FiSend />
                     Apply
                   </button>
                 )}
@@ -105,7 +129,10 @@ const JobsList = ({
             </div>
           ))
         ) : (
-          <p className="my-10 text-lg font-semibold">No jobs available</p>
+          <div className="my-10 text-center">
+            <p className="text-lg font-semibold mb-4">No jobs available</p>
+            <div className="text-gray-500 text-6xl">😞</div>
+          </div>
         )}
       </div>
     </div>

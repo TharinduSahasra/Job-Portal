@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.JobPortal.model.Recruiter;
@@ -64,9 +65,14 @@ public class RecruiterController {
     }
     
     @PostMapping("/{email}/removejob")
-    public ResponseEntity<Recruiter> removeJob(@PathVariable String email, @RequestBody String jobId) {
-        return new ResponseEntity<Recruiter>(recruiterService.removeJobFromRecruiter(email, jobId), HttpStatus.OK);
+public ResponseEntity<?> removeJob(@PathVariable String email, @RequestBody Map<String, String> request) {
+    try {
+        String jobId = request.get("jobId");
+        return new ResponseEntity<>(recruiterService.removeJobFromRecruiter(email, jobId), HttpStatus.OK);
+    } catch (Exception e) {
+        return new ResponseEntity<>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+}
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Recruiter recruiter) {
@@ -131,4 +137,6 @@ public class RecruiterController {
         recruiterService.deleteRecruiter(email);
         return new ResponseEntity<String>("Recruiter deleted successfully", HttpStatus.NO_CONTENT);
     }
+
+    
 }
