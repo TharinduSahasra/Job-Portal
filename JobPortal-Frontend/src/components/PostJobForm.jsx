@@ -52,7 +52,7 @@ const PostJobForm = () => {
       experience,
       description,
       skills: skillsArray,
-      salaryRange: `${minSalary} - ${maxSalary} USD`,
+      salaryRange: `${minSalary} - ${maxSalary} LKR`,
     };
 
     if (parseInt(minSalary) > parseInt(maxSalary)) {
