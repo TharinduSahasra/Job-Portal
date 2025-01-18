@@ -3,7 +3,7 @@ const Footer = () => {
     <footer className="bg-gray-900 py-8 text-white font-medium">
       <div className="max-w-7xl mx-auto px-6 text-center">
         <p className="text-lg sm:text-xl mb-4 hover:text-purple-400 transition-colors">
-          &copy; 2024 JobFix. All rights reserved.
+          &copy; 2025 JobFix. All rights reserved.
         </p>
 
         {/* Social Media Links */}

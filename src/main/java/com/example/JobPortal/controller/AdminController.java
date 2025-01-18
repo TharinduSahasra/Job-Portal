@@ -23,17 +23,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.JobPortal.model.Admin;
 import com.example.JobPortal.model.Candidate;
+import com.example.JobPortal.model.JobApplication;
 import com.example.JobPortal.model.Recruiter;
 import com.example.JobPortal.service.AdminService;
 import com.example.JobPortal.service.RecruiterService;
 import com.example.JobPortal.service.CandidateService;
+import com.example.JobPortal.service.JobApplicationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/v1/admins")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins ="*")
 public class AdminController {
 
     @Autowired
@@ -48,11 +52,12 @@ public class AdminController {
     @Autowired
     private CandidateService candidateService;
 
-
+   
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    
+    @Autowired
+    private JobApplicationService jobApplicationService;
 
     @GetMapping("/{email}")
     public ResponseEntity<Optional<Admin>> getSingleAdmin(@PathVariable String email) {
@@ -127,8 +132,9 @@ public class AdminController {
        return new ResponseEntity<>(candidates, HttpStatus.OK);
    }
 
-   // Admin: Delete recruiter by email
-   @DeleteMapping("/recruiter/delete/{email}")
+   
+   @CrossOrigin(origins = "*")
+   @DeleteMapping("/recruiters/delete/{email}")
    public ResponseEntity<String> deleteRecruiter(@PathVariable String email) {
        Optional<Recruiter> recruiter = recruiterService.singleRecruiter(email);
        if (recruiter.isEmpty()) {
@@ -140,7 +146,7 @@ public class AdminController {
    }
 
    // Admin: Delete candidate by email
-   @DeleteMapping("/candidate/delete/{email}")
+   @DeleteMapping("/candidates/delete/{email}")
    public ResponseEntity<String> deleteCandidate(@PathVariable String email) {
        Optional<Candidate> candidate = candidateService.singleCandidate(email);
        if (candidate.isEmpty()) {
@@ -150,4 +156,18 @@ public class AdminController {
        candidateService.deleteCandidate(email);
        return new ResponseEntity<>("Candidate deleted successfully", HttpStatus.OK);
    }
+
+   @GetMapping("/candidate-applications/{email}")
+   public ResponseEntity<List<JobApplication>> getCandidateApplications(@PathVariable String email) {
+       List<JobApplication> applications = jobApplicationService.getApplicationsByEmail(email);
+
+       if (applications.isEmpty()) {
+           return new ResponseEntity<>(List.of(), HttpStatus.NOT_FOUND);
+       }
+
+       return new ResponseEntity<>(applications, HttpStatus.OK);
+   }
 }
+
+    
+

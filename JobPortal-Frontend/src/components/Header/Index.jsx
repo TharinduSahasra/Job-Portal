@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-
-import { FiUser, FiLogOut, FiHome, FiBriefcase } from "react-icons/fi"; // Icons
+import { FiUser, FiLogOut, FiHome, FiBriefcase, FiSettings } from "react-icons/fi"; // Icons
 import Logo from "../Logo";
 import api from "../../api/axiosConfig";
 import { logout as storeLogout } from "../../store/authSlice";
@@ -13,6 +12,7 @@ const Header = () => {
 
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const isRecruiter = useSelector((state) => state.auth.isRecruiter);
+  const isAdmin = useSelector((state) => state.auth.isAdmin);
 
   const [isLoading, setIsLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -22,9 +22,14 @@ const Header = () => {
       e.preventDefault();
       setIsLoading(true);
 
-      const apiEndpoint = isRecruiter
-        ? "/api/v1/recruiters/logout"
-        : "/api/v1/candidates/logout";
+      let apiEndpoint = "";
+      if (isAdmin) {
+        apiEndpoint = "/api/v1/admins/logout";
+      } else if (isRecruiter) {
+        apiEndpoint = "/api/v1/recruiters/logout";
+      } else {
+        apiEndpoint = "/api/v1/candidates/logout";
+      }
 
       const response = await api.post(apiEndpoint);
       setIsLoading(false);
@@ -59,22 +64,35 @@ const Header = () => {
           <ul className="hidden md:flex gap-x-6 text-white/80 font-semibold text-base 2xl:text-xl">
             <li>
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate(isAdmin ? "/admin/dashboard" : "/")}
                 className="flex items-center gap-2 px-4 py-2 duration-200 hover:bg-slate-900 hover:text-purple-400 rounded-2xl"
               >
                 <FiHome />
-                Home
+                {isAdmin ? "Dashboard" : "Home"}
               </button>
             </li>
-            <li>
-              <button
-                onClick={() => navigate("/jobs")}
-                className="flex items-center gap-2 px-4 py-2 duration-200 hover:bg-slate-900 hover:text-purple-400 rounded-2xl"
-              >
-                <FiBriefcase />
-                Job Listings
-              </button>
-            </li>
+            {!isAdmin && (
+              <li>
+                <button
+                  onClick={() => navigate("/jobs")}
+                  className="flex items-center gap-2 px-4 py-2 duration-200 hover:bg-slate-900 hover:text-purple-400 rounded-2xl"
+                >
+                  <FiBriefcase />
+                  Job Listings
+                </button>
+              </li>
+            )}
+            {isAdmin && (
+              <li>
+                <button
+                  onClick={() => navigate("/admin/manage-users")}
+                  className="flex items-center gap-2 px-4 py-2 duration-200 hover:bg-slate-900 hover:text-purple-400 rounded-2xl"
+                >
+                  <FiSettings />
+                  Manage Users
+                </button>
+              </li>
+            )}
           </ul>
         )}
 
@@ -97,6 +115,14 @@ const Header = () => {
                 >
                   View Profile
                 </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => navigate("/admin/manage-users")}
+                    className="w-full text-left px-4 py-3 hover:bg-gradient-to-r from-yellow-500 to-orange-500 hover:text-white transition-all"
+                  >
+                    Manage Users
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   disabled={isLoading}
@@ -123,6 +149,13 @@ const Header = () => {
               className="py-2 px-6 bg-green-600 hover:opacity-70 rounded-lg text-white text-base font-semibold transition-opacity"
             >
               Candidate Login
+            </button>
+
+            <button
+              onClick={() => navigate("/login/admin")}
+              className="py-2 px-6 bg-red-600 hover:opacity-70 rounded-lg text-white text-base font-semibold transition-opacity"
+            >
+              Admin Login
             </button>
           </div>
         )}

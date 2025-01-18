@@ -37,6 +37,13 @@ const ApplicationsSection = () => {
               return {
                 ...application,
                 position: jobInfo?.position || null,
+                company: jobInfo?.company || null,
+                location: jobInfo?.location || null,
+                resumeLink: application.resumeLink || null,
+                candidateEmail: application.email || null,
+                candidatePhone: application.phone || null,
+                qualification: application.qualification || null,
+                skills: application.skills || [],
               };
             }
           );
@@ -112,14 +119,30 @@ const ApplicationsSection = () => {
   const renderApplicationCard = (item, statusActions = false) => (
     <div
       key={item.id}
-      className="flex justify-between items-center gap-6 p-6 rounded-lg bg-gray-800 border border-gray-600 shadow-md"
+      className="flex flex-col gap-4 p-6 rounded-lg bg-gray-800 border border-gray-600 shadow-md"
     >
-      <div className="flex-grow">
+      <div>
         <h3 className="text-lg font-semibold text-white">{item.position}</h3>
-        <p className="text-sm text-gray-400">
-          {item.company} - {item.location}
-        </p>
+        <p className="text-sm text-gray-400">{item.company} - {item.location}</p>
         <p className="text-sm mt-2 text-gray-500">Applied by: {item.name}</p>
+        <p className="text-sm text-gray-400">Email: {item.candidateEmail}</p>
+        <p className="text-sm text-gray-400">Phone: {item.candidatePhone}</p>
+        <p className="text-sm text-gray-400">Qualification: {item.qualification}</p>
+
+        {item.skills.length > 0 && (
+          <p className="text-sm text-gray-400">Skills: {item.skills.join(", ")}</p>
+        )}
+
+        {item.resumeLink && (
+          <a
+            href={item.resumeLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline mt-2 block"
+          >
+            View Resume
+          </a>
+        )}
       </div>
 
       {statusActions ? (
@@ -149,9 +172,7 @@ const ApplicationsSection = () => {
       ) : (
         <p
           className={`font-bold ${
-            item.status === "Accepted"
-              ? "text-green-400"
-              : "text-red-400"
+            item.status === "Accepted" ? "text-green-400" : "text-red-400"
           }`}
         >
           {item.status}
