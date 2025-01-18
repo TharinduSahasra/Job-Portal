@@ -20,46 +20,55 @@ const LoginForm = ({ userType }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate(userType === "admin" ? "/admin/dashboard" : "/");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, userType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    const isRecruiter = userType === "recruiter";
     const loginObject = { email, password };
-
     setIsLoading(true);
 
     try {
-      const apiEndpoint = isRecruiter
-        ? "/api/v1/recruiters/login"
-        : "/api/v1/candidates/login";
+      let apiEndpoint = "";
+
+      if (userType === "admin") {
+        apiEndpoint = "/api/v1/admins/login";
+      } else if (userType === "recruiter") {
+        apiEndpoint = "/api/v1/recruiters/login";
+      } else {
+        apiEndpoint = "/api/v1/candidates/login";
+      }
 
       const response = await api.post(apiEndpoint, loginObject);
 
       if (response.status === 200) {
         dispatch(
           storeLogin({
-            isRecruiter,
-            userData: isRecruiter
-              ? response.data.recruiter
-              : response.data.candidate,
+            isAdmin: userType === "admin",
+            isRecruiter: userType === "recruiter",
+            userData:
+              userType === "admin"
+                ? response.data.admin
+                : userType === "recruiter"
+                ? response.data.recruiter
+                : response.data.candidate,
           })
         );
-        navigate("/");
-        setIsLoading(false);
+
+        navigate(userType === "admin" ? "/admin/dashboard" : "/");
       }
     } catch (error) {
-      if (error.response.status === 404) {
-        setError("This email or username is not registered");
-      } else if (error.response.status === 401) {
-        setError("Wrong password");
+      if (error.response?.status === 404) {
+        setError("This email is not registered.");
+      } else if (error.response?.status === 401) {
+        setError("Incorrect password.");
       } else {
-        setError("Something went wrong!");
+        setError("Something went wrong. Try again!");
       }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -67,10 +76,14 @@ const LoginForm = ({ userType }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className={`p-10 max-w-lg mx-auto mt-24 bg-gray-800 rounded-lg shadow-md flex flex-col gap-6`}
+      className="p-10 max-w-lg mx-auto mt-24 bg-gray-800 rounded-lg shadow-md flex flex-col gap-6"
     >
       <h1 className="text-4xl font-bold text-white text-center mb-8">
-        {userType === "recruiter" ? "Recruiter Login" : "Candidate Login"}
+        {userType === "admin"
+          ? "Admin Login"
+          : userType === "recruiter"
+          ? "Recruiter Login"
+          : "Candidate Login"}
       </h1>
 
       <div className="space-y-4">
@@ -111,22 +124,30 @@ const LoginForm = ({ userType }) => {
       <button
         type="submit"
         disabled={isLoading}
-        className={`py-3 px-6 mt-8 bg-indigo-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 ${isLoading && "opacity-50"}`}
+        className={`py-3 px-6 mt-8 bg-indigo-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 ${
+          isLoading && "opacity-50"
+        }`}
       >
         {isLoading ? "Logging In..." : "Login"}
       </button>
 
       {/* Error Notification */}
-      {error && (
-        <p className="text-red-500 text-center mt-4 font-semibold">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-center mt-4 font-semibold">{error}</p>}
 
       <p className="text-center mt-6 text-white">
         <Link
-          to={`/register/${userType === "recruiter" ? "recruiter" : "candidate"}`}
+          to={`/register/${
+            userType === "admin"
+              ? "admin"
+              : userType === "recruiter"
+              ? "recruiter"
+              : "candidate"
+          }`}
           className="text-gray-300 hover:text-indigo-400 text-lg font-medium"
         >
-          New here? Create a New Account
+          {userType === "admin"
+            ? "New here? Register as Admin"
+            : "New here? Create a New Account"}
         </Link>
       </p>
     </form>

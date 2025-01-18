@@ -8,7 +8,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.JobPortal.model.Candidate;
+import com.example.JobPortal.model.JobApplication;
 import com.example.JobPortal.repository.CandidateRepository;
+import com.example.JobPortal.repository.JobApplicationRepository;
 
 @Service
 public class CandidateService {
@@ -17,6 +19,9 @@ public class CandidateService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    JobApplicationRepository jobApplicationRepository;
 
     public List<Candidate> allCandidates() {
         return candidateRepository.findAll();
@@ -36,7 +41,6 @@ public void deleteCandidate(String email) {
         candidateRepository.delete(candidate);
     }
    
-
 
 
 

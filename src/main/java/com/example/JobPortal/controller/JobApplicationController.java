@@ -54,4 +54,6 @@ public class JobApplicationController {
             return new ResponseEntity<String>("Invalid option", HttpStatus.BAD_REQUEST);
         }
     }
+
+    
 }

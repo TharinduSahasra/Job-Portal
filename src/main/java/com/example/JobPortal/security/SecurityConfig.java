@@ -18,15 +18,20 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // Secure password encoding
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails userDetails = User.withDefaultPasswordEncoder().username("user")
-                .password("password").roles("USER").build();
+        // Create a user with BCrypt encoded password
+        UserDetails userDetails = User.builder()
+                .username("user")
+                .password(passwordEncoder().encode("password")) // BCrypt encoding
+                .roles("USER")
+                .build();
 
         return new InMemoryUserDetailsManager(userDetails);
     }
@@ -35,19 +40,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authz) -> authz
-                        .anyRequest().permitAll()
+                        .anyRequest().permitAll() // Allow all requests for now
                 )
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults());
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF (be cautious if enabling this for production)
+                .httpBasic(Customizer.withDefaults()); // Basic HTTP authentication
+
         return http.build();
     }
 
     @Bean
     public static AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        // Configure DaoAuthenticationProvider with custom user details service and password encoder
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
 
-        return new ProviderManager(authenticationProvider);
+        return new ProviderManager(authenticationProvider); // Return configured AuthenticationManager
     }
 }

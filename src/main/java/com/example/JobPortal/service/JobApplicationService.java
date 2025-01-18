@@ -34,4 +34,9 @@ public class JobApplicationService {
         jobApplicationRepository.save(application);
         return application;
     }
-}
+
+    public List<JobApplication> getApplicationsByEmail(String email) {
+        return jobApplicationRepository.findByEmail(email);
+    }
+
+    }
