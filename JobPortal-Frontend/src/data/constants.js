@@ -24,4 +24,5 @@ export const qualificationOptions = [
     { value: "Jupyter Notebook", label: "Jupyter Notebook" },
     { value: "MATLAB", label: "MATLAB" },
     { value: "C/C++", label: "C/C++" },
+    { value: "figma", label: "figma" }, 
   ];
