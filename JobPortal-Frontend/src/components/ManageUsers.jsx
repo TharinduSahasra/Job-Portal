@@ -1,34 +1,38 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
-import { FaSearch, FaTrash, FaUserTie, FaEnvelope, FaTimesCircle, FaInfoCircle } from "react-icons/fa";
+import {
+  FaSearch,
+  FaTrash,
+  FaUserTie,
+  FaEnvelope,
+  FaTimesCircle,
+  FaEye,
+} from "react-icons/fa";
 
 const ManageUsers = () => {
   const [userType, setUserType] = useState("recruiters");
   const [users, setUsers] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [error, setError] = useState("");
-  const [visibleUsers, setVisibleUsers] = useState(6);
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [candidateApplications, setCandidateApplications] = useState([]);
-  const [jobs, setJobs] = useState([]);  // New state to store job data
+  const [error, setError] = useState("");
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [appliedJobs, setAppliedJobs] = useState([]);
 
-  const apiEndpoints = {
-    recruiters: "/api/v1/admins/recruiters",
-    candidates: "/api/v1/admins/candidates",
-    candidateApplications: "/api/v1/admins/candidate-applications",
-    jobs: "/api/v1/jobs",  // New endpoint to fetch jobs
-  };
+  useEffect(() => {
+    fetchUsers();
+    fetchJobs();
+  }, [userType]);
 
   const fetchUsers = async () => {
     setLoading(true);
+    setError("");
     try {
-      const response = await api.get(apiEndpoints[userType]);
+      const response = await api.get(`/api/v1/admins/${userType}`);
       setUsers(response.data || []);
     } catch (err) {
-      setError(`Error fetching ${userType}. Please try again later.`);
+      setError(`Error fetching ${userType}. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -36,66 +40,39 @@ const ManageUsers = () => {
 
   const fetchJobs = async () => {
     try {
-      const response = await api.get(apiEndpoints.jobs);
+      const response = await api.get("/api/v1/jobs");
       setJobs(response.data || []);
     } catch (err) {
-      setError("Error fetching jobs.");
+      console.error("Error fetching jobs:", err);
+      setJobs([]);
     }
   };
-
-  useEffect(() => {
-    fetchUsers();
-    fetchJobs();  // Fetch jobs when component mounts
-  }, [userType]);
 
   const fetchCandidateApplications = async (email) => {
     try {
-      const response = await api.get(`${apiEndpoints.candidateApplications}/${email}`);
-      setCandidateApplications(response.data || []);
+      const response = await api.get(`/api/v1/admins/candidate-applications/${email}`);
+      const applications = response.data || [];
+
+      // Enrich applications with job details
+      const enrichedApplications = applications.map((application) => {
+        const jobInfo = jobs.find((job) => job.id === application.jobId);
+        return {
+          ...application,
+          jobTitle: jobInfo?.position || "Unknown Job",
+          company: jobInfo?.company || "Unknown Company",
+          location: jobInfo?.location || "Unknown Location",
+        };
+      });
+
+      setAppliedJobs(enrichedApplications);
+      setSelectedUser(email);
+      setShowDetailsModal(true);
     } catch (err) {
-      setError("Error fetching candidate applications.");
+      console.error("Error fetching candidate applications:", err);
+      setAppliedJobs([]);
+      setSelectedUser(email);
+      setShowDetailsModal(true);
     }
-  };
-
-  const handleDeleteUser = async () => {
-    if (userToDelete) {
-      try {
-        await api.delete(`${apiEndpoints[userType]}/delete/${userToDelete}`);
-        setUsers((prevUsers) => prevUsers.filter((user) => user.email !== userToDelete));
-        setShowModal(false);
-      } catch (err) {
-        setError(`Error deleting ${userType.slice(0, -1)}.`);
-      }
-    }
-  };
-
-  const filteredUsers = users.filter((user) =>
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleClearSearch = () => setSearchQuery("");
-
-  const handleShowCandidateDetails = (candidate) => {
-    setSelectedCandidate(candidate);
-    fetchCandidateApplications(candidate.email);
-    setShowModal(true);
-  };
-
-  const handleShowMore = () => {
-    setLoading(true);
-    setVisibleUsers(visibleUsers + 6);
-    setLoading(false);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
-
-  // Fetch job info for the candidate
-  const getJobDetails = (jobId) => {
-    const job = jobs.find((job) => job.id === jobId);
-    return job ? job.position : "Job not found";
   };
 
   return (
@@ -115,15 +92,6 @@ const ManageUsers = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <FaSearch className="absolute right-4 top-3 text-gray-400" />
-            {searchQuery && (
-              <button
-                className="absolute left-4 top-3 text-gray-400"
-                onClick={handleClearSearch}
-                aria-label="Clear search"
-              >
-                <FaTimesCircle />
-              </button>
-            )}
           </div>
 
           <select
@@ -136,66 +104,34 @@ const ManageUsers = () => {
           </select>
         </div>
 
-        {loading && (
-          <div className="text-center text-gray-300">
-            <p>Loading users...</p>
-          </div>
-        )}
-
-        {error && (
-          <div>
-            <p className="text-red-500 text-center mb-4">{error}</p>
-            <button
-              onClick={fetchUsers}
-              className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
-            >
-              Retry
-            </button>
-          </div>
-        )}
+        {loading && <p className="text-center text-gray-300">Loading users...</p>}
+        {error && <p className="text-red-500 text-center">{error}</p>}
 
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-          {filteredUsers.length > 0 ? (
+          {users.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredUsers.slice(0, visibleUsers).map((user) => (
+              {users.map((user) => (
                 <div
                   key={user.email}
-                  className="bg-gray-700 p-4 rounded-lg shadow-md hover:bg-gray-600 transition-all"
+                  className="bg-gray-700 p-4 rounded-lg shadow-md hover:bg-gray-600"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <FaUserTie className="text-blue-400 text-2xl" />
-                    <h2 className="text-xl font-semibold">{user.name || "Unknown"}</h2>
-                  </div>
-                  <p className="flex items-center gap-2 text-gray-300">
-                    <FaEnvelope className="text-gray-400" /> {user.email}
+                  <h2 className="text-xl font-semibold">{user.name || "Unknown"}</h2>
+                  <p className="text-gray-300">
+                    <FaEnvelope /> {user.email}
                   </p>
-                  {user.company && (
-                    <p className="text-gray-400 mt-2">Company: {user.company}</p>
-                  )}
-
-                  {/* Show job details for candidates */}
-                  {userType === "candidates" && (
-                    <p className="text-gray-400 mt-2">Job: {getJobDetails(user.jobId)}</p>
-                  )}
 
                   <div className="flex gap-4 mt-4">
-                    <button
-                      onClick={() => {
-                        setUserToDelete(user.email);
-                        setShowModal(true);
-                      }}
-                      className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-all flex items-center justify-center gap-2"
-                    >
-                      <FaTrash /> Delete
-                    </button>
                     {userType === "candidates" && (
                       <button
-                        onClick={() => handleShowCandidateDetails(user)}
-                        className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
+                        onClick={() => fetchCandidateApplications(user.email)}
+                        className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
                       >
-                        <FaInfoCircle /> View Details
+                        <FaEye /> View Applications
                       </button>
                     )}
+                    <button className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">
+                      <FaTrash /> Delete
+                    </button>
                   </div>
                 </div>
               ))}
@@ -204,58 +140,32 @@ const ManageUsers = () => {
             <p className="text-center text-gray-400">No {userType} found.</p>
           )}
         </div>
-
-        {filteredUsers.length > visibleUsers && (
-          <div className="flex justify-center mt-6">
-            <button
-              onClick={handleShowMore}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all"
-            >
-              {loading ? 'Loading...' : 'Show More'}
-            </button>
-          </div>
-        )}
       </div>
 
-      {showModal && selectedCandidate && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={handleCloseModal}
-        >
-          <div
-            className="bg-gray-800 p-6 rounded-lg w-96"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-semibold text-white mb-4">
-              {selectedCandidate.name || "Unknown"}'s Details
-            </h3>
-            <p className="text-gray-300 mb-4">Email: {selectedCandidate.email}</p>
-            {selectedCandidate.company && (
-              <p className="text-gray-300 mb-4">Company: {selectedCandidate.company}</p>
+      {showDetailsModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-gray-800 p-6 rounded-lg max-w-lg w-full">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Applications for {selectedUser}
+            </h2>
+            {appliedJobs.length > 0 ? (
+              <ul className="text-gray-300">
+                {appliedJobs.map((app, index) => (
+                  <li key={index} className="mb-2 p-2 bg-gray-700 rounded-lg">
+                    <strong>{app.jobTitle}</strong> at {app.company} -{" "}
+                    <span className="text-yellow-400">{app.status}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-300">No job applications found.</p>
             )}
-            <h4 className="text-lg text-gray-100 mb-2">Job Applications</h4>
-            <ul className="list-disc pl-5 text-gray-300">
-              {candidateApplications.length > 0 ? (
-                candidateApplications.map((app) => {
-                  const jobDetails = getJobDetails(app.jobId); // Get job details by matching jobId
-                  return (
-                    <li key={`${selectedCandidate.email}-${app.jobId}-${app.status}`}>
-                      <p>{jobDetails} - Status: {app.status}</p>
-                    </li>
-                  );
-                })
-              ) : (
-                <li>No applications found.</li>
-              )}
-            </ul>
-            <div className="flex justify-between gap-4 mt-6">
-              <button
-                onClick={handleCloseModal}
-                className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={() => setShowDetailsModal(false)}
+              className="mt-4 bg-gray-600 text-white px-4 py-2 rounded-lg"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

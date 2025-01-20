@@ -125,8 +125,8 @@ const ApplicationsSection = () => {
         <h3 className="text-lg font-semibold text-white">{item.position}</h3>
         <p className="text-sm text-gray-400">{item.company} - {item.location}</p>
         <p className="text-sm mt-2 text-gray-500">Applied by: {item.name}</p>
-        <p className="text-sm text-gray-400">Email: {item.candidateEmail}</p>
-        <p className="text-sm text-gray-400">Phone: {item.candidatePhone}</p>
+        {/* <p className="text-sm text-gray-400">Email: {item.candidateEmail}</p>
+        <p className="text-sm text-gray-400">Phone: {item.candidatePhone}</p> */}
         <p className="text-sm text-gray-400">Qualification: {item.qualification}</p>
 
         {item.skills.length > 0 && (
